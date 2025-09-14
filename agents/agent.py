@@ -34,6 +34,23 @@ def call_transcription_agent(audio_url):
     response = json.loads(stdout)
     return response.get("content", "")
 
+def call_translation_agent(text, target_lang="es"):
+    proc = subprocess.Popen(
+        [sys.executable, "agents/translation-agent/agent.py"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        text=True
+    )
+    coral_msg = {
+        "sender": "orchestrator",
+        "receiver": "translation-agent",
+        "content": text,
+        "target_lang": target_lang
+    }
+    stdout, _ = proc.communicate(input=json.dumps(coral_msg) + "\n")
+    response = json.loads(stdout)
+    return response.get("content", "")
+
 if __name__ == "__main__":
     for line in sys.stdin:
         try:
@@ -51,10 +68,13 @@ if __name__ == "__main__":
                 continue
             audio_url = entries[0]["audio_url"]
             transcript = call_transcription_agent(audio_url)
+            # Traducción al idioma destino (por defecto español)
+            target_lang = msg.get("target_lang", "es")
+            translation = call_translation_agent(transcript, target_lang)
             response = {
                 "sender": "orchestrator",
                 "receiver": msg["sender"],
-                "content": transcript
+                "content": translation
             }
             print(json.dumps(response), flush=True)
         except Exception as e:
