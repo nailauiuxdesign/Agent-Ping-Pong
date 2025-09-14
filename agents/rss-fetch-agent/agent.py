@@ -1,3 +1,6 @@
+import sys
+import json
+
 import feedparser
 
 def fetch_rss_feed(url):
@@ -11,10 +14,30 @@ def fetch_rss_feed(url):
             elif hasattr(entry, 'enclosure') and entry.enclosure:
                 audio_url = entry.enclosure.get('href')
             entries.append({
-                'title': entry.title,
-                'link': entry.link,
-                'published': entry.published,
-                'summary': entry.summary,
+                'title': getattr(entry, 'title', None),
+                'link': getattr(entry, 'link', None),
+                'published': getattr(entry, 'published', None),
+                'summary': getattr(entry, 'summary', None),
                 'audio_url': audio_url
             })
     return entries
+
+if __name__ == "__main__":
+    for line in sys.stdin:
+        try:
+            msg = json.loads(line)
+            feed_url = msg.get("content")
+            entries = fetch_rss_feed(feed_url)
+            response = {
+                "sender": msg["receiver"],
+                "receiver": msg["sender"],
+                "content": entries
+            }
+            print(json.dumps(response), flush=True)
+        except Exception as e:
+            error_response = {
+                "sender": "rss-fetch-agent",
+                "receiver": msg.get("sender", "unknown"),
+                "content": f"Error: {str(e)}"
+            }
+            print(json.dumps(error_response), flush=True)
