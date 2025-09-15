@@ -37,7 +37,16 @@ This project demonstrates how to build composable, language-agnostic agent workf
 - To reset tracking for a feed, delete its corresponding `seen_episodes_<hash>.json` file.
 
 -----
-#  Global Podcaster App
+#  🎙️Global Podcaster App
+
+### **Global Podcaster: Breaking language barriers in podcasting**
+
+What if your podcast could instantly reach millions of new listeners in Japan, Spain, or Germany, all while speaking in **your own authentic voice**? Global Podcaster is a revolutionary platform that breaks the language barrier for content creators, turning your local podcast into a global phenomenon. 
+
+
+We solve a major problem for creators: reaching international audiences is expensive, time-consuming, and often results in robotic, impersonal dubbing. Global Podcaster changes everything with a seamless, AI-powered workflow.
+
+## App Overview
 * **Track**: App Builder
 * **Problem**: Podcasts have a global audience, but language barriers limit their reach. Dubbing a podcast is expensive and time-consuming.
 * **Solution**: A web app where a podcaster can submit their RSS feed. The app automatically fetches new episodes, transcribes them, translates the text into a target language, and then uses a clone of the host's voice to generate a fully translated audio episode. The new translated podcast gets its own RSS feed.
@@ -45,45 +54,51 @@ This project demonstrates how to build composable, language-agnostic agent workf
 	* **Coral Protocol**: To orchestrate the entire pipeline: an "RSS Fetch Agent," a "**Transcription Agent**," a "**Translation Agent**," and a "**Voice Synthesis Agent**."
     * **ElevenLabs**: The star of the show for the voice cloning and audio generation.
     * **Mistral AI**: To provide high-quality, context-aware translations.
+ 
+## How It Works
+
+Simply provide your podcast's RSS feed and a short sample of your voice. Our autonomous agent network, orchestrated by **Coral Protocol**, takes over:
+
+1.  **Listen & Transcribe:** An agent automatically detects new episodes and converts them to text.
+2.  **Translate & Adapt:** The script is translated with nuanced, context-aware understanding by **Mistral AI**.
+3.  **Recreate & Publish:** Here's the magic. Using **ElevenLabs'** cutting-edge technology, we regenerate the entire episode in the new language, perfectly cloned in *your voice*.
+
+The result is a new, translated RSS feed, ready for distribution. It's not just a translation; it's your show, for a new culture, with the personality and trust that only your voice can provide.
+
+## Key Features
+
+* **Fully Automated:** Set it up once and new episodes are translated as they're released.
+* **Authentic Voice Cloning:** Maintain your brand and connection with your audience.
+* **Multi-Language Support:** Instantly create versions for multiple new markets.
+* **Seamless Distribution:** Get a simple RSS feed for every language, compatible with all major podcast platforms.
+
+## The Vision
+
+Global Podcaster is more than a tool; it's a bridge connecting creators and cultures. We are building a world where great ideas and compelling stories are no longer limited by language, empowering every podcaster to speak to the world.
 
 -----
 
-## 1\. Agent Flow Diagram
+### 1\. User Flow: From the Podcaster's Perspective
 
-This diagram shows the step-by-step pipeline of how a new podcast episode is processed. The entire flow is orchestrated by **Coral Protocol**, which passes a job from one specialized agent to the next until the process is complete.
+This describes the journey a user (the podcaster) would take when interacting with your app.
 
-```mermaid
-graph TD
-    A[Start: New Episode Detected] --> B(RSS-Monitor-Agent);
-    B -->|1. Sends Audio URL via Coral| C(Transcription-Agent);
-    C -->|2. Sends Transcript via Coral| D(Translation-Agent);
-    D -->|3. Sends Translated Text via Coral| E(Voice-Synthesis-Agent);
-    E -->|4. Sends New Audio URL via Coral| F(RSS-Publisher-Agent);
-    F --> G[End: Translated Episode Published];
+**Step 1: Onboarding & Setup (One-time action)**
 
-    subgraph External APIs
-        D -- Calls --> Mistral(Mistral AI API);
-        E -- Calls --> ElevenLabs(ElevenLabs API);
-        C -- Calls --> STT(Speech-to-Text API);
-    end
+1.  **Sign Up:** The podcaster creates an account on your web application.
+2.  **Submit RSS Feed:** On their dashboard, they submit the public RSS feed URL of their original podcast (e.g., their Spotify or Apple Podcasts feed).
+3.  **Voice Cloning:**
+      * The app prompts the podcaster to provide a voice sample for cloning.
+      * The simplest way is an uploader where they can provide a 1-5 minute MP3 file of them speaking clearly with no background noise.
+      * The app sends this sample to **ElevenLabs** to create a unique voice clone and stores the resulting Voice ID associated with the user's account.
+4.  **Select Languages:** The podcaster chooses one or more target languages they want their podcast translated into (e.g., Spanish, French, German).
+5.  **Receive New Feed URL:** The system immediately generates a new, unique RSS feed URL for each selected language and displays it on the dashboard. This feed will be empty at first, but the podcaster can already submit it to podcasting platforms.
 
-    style A fill:#90EE90,stroke:#333,stroke-width:2px
-    style G fill:#90EE90,stroke:#333,stroke-width:2px
-    style B fill:#ADD8E6,stroke:#333,stroke-width:2px
-    style C fill:#ADD8E6,stroke:#333,stroke-width:2px
-    style D fill:#ADD8E6,stroke:#333,stroke-width:2px
-    style E fill:#ADD8E6,stroke:#333,stroke-width:2px
-    style F fill:#ADD8E6,stroke:#333,stroke-width:2px
-```
+**Step 2: Automated Episode Processing (Ongoing)**
 
-### **Flow Breakdown:**
-
-1.  **`RSS-Monitor-Agent`** detects a new episode and initiates the workflow by passing the original audio URL to the next agent.
-2.  **`Transcription-Agent`** receives the audio, converts it to text using a Speech-to-Text API, and passes the resulting transcript onward.
-3.  **`Translation-Agent`** takes the transcript, translates it using **Mistral AI**, and sends the translated text to the synthesis agent.
-4.  **`Voice-Synthesis-Agent`** uses the podcaster's cloned voice on **ElevenLabs** to convert the translated text into a new audio file.
-5.  **`RSS-Publisher-Agent`** takes the final audio file URL and all the translated metadata (title, description) and updates the new, language-specific RSS feed.
-
+1.  **Detection:** Your application's backend automatically checks the podcaster's original RSS feed periodically (e.g., every hour).
+2.  **Processing:** When it detects a new episode, the entire agent pipeline is triggered automatically.
+3.  **Notification:** Once the translation is complete (this could take several minutes depending on the episode length), the podcaster receives an email notification: "Your new episode of '[Podcast Name] - Spanish Edition' is now live\!"
+4.  **Distribution:** The newly generated, translated episode is automatically added to the corresponding translated RSS feed, making it available on all platforms where that new feed has been added.
 -----
 
 ## 2\. Architecture Diagram
@@ -137,14 +152,83 @@ graph LR
     style STT fill:#FFDDC1,stroke:#333,stroke-width:1px
 ```
 
-### **Architecture Breakdown:**
+Of course. Let's break down the **"Global Podcaster" App** into a detailed plan, covering user flows, specific agent tasks, and the overall application architecture. This will serve as a comprehensive blueprint for building the project during the hackathon.
 
-  * **User Interaction:** The podcaster interacts only with the **Frontend**, which is a clean, simple web interface for managing their account and podcasts.
-  * **Your Application Infrastructure:**
-      * The **Frontend** communicates with your **Backend** via a standard REST or GraphQL API.
-      * The **Backend** is the central brain. It handles user data, stores information in the **Database**, and most importantly, it acts as the **Orchestrator**. It is the only part of your system that directly tells the **Coral Protocol Network** to start a new job.
-      * The **Coral Protocol Network** is the communication layer for your agents. It ensures that jobs are passed reliably from one agent to the next. The agents themselves can be hosted as independent serverless functions.
-  * **External Services:** These are the third-party AI platforms that provide the core intelligence. Your agents are responsible for calling these APIs with the correct data and handling their responses.
+-----
+
+
+### Application Architecture
+
+This is how all the pieces fit together.
+
+**Components:**
+
+1.  **Frontend (Client-Side):**
+
+      * **Technology:** A simple static web app (e.g., built with React, Vue, or basic HTML/CSS/JS).
+      * **Responsibilities:** User registration/login, dashboard UI, form for submitting RSS feed, voice sample uploader, displaying the translated RSS feed URLs and episode statuses.
+      * **Hosted On:** Vercel, Netlify, or similar.
+
+2.  **Backend (Orchestrator & API):**
+
+      * **Technology:** A lightweight server (e.g., Node.js with Express, or Python with Flask).
+      * **Responsibilities:**
+          * Manages user authentication and data.
+          * Provides API endpoints for the frontend.
+          * **Acts as the primary client for Coral Protocol.** When a new episode is found, this backend is what initiates the first job in the Coral network.
+          * Serves the generated XML RSS feed files.
+      * **Database:** A simple DB (e.g., Supabase, Firebase, or even SQLite for a hackathon) to store user info, RSS feeds, voice IDs, and job statuses.
+
+3.  **Agent Services (The Workers):**
+
+      * **Technology:** Each of the 5 agents described above is deployed as a separate, lightweight service. Serverless functions (e.g., Vercel Functions, AWS Lambda, Google Cloud Functions) are *perfect* for this.
+      * **Responsibilities:** Each agent does only its one specific job. They are stateless and only communicate with each other via the **Coral Protocol** network.
+
+4.  **External APIs (The Brains):**
+
+      * **Mistral AI:** For high-quality text translation.
+      * **ElevenLabs:** For the core voice cloning and text-to-speech synthesis.
+      * **AI/ML API (or similar):** For audio transcription.
+
+This architecture is robust, scalable, and perfectly aligns with the theme of the "Internet of Agents." It showcases a real, working product built on a foundation of secure, interoperable, and collaborative agents orchestrated by **Coral Protocol**.
+
+-----
+
+## 3\. Agent Flow Diagram
+
+This diagram shows the step-by-step pipeline of how a new podcast episode is processed. The entire flow is orchestrated by **Coral Protocol**, which passes a job from one specialized agent to the next until the process is complete.
+
+```mermaid
+graph TD
+    A[Start: New Episode Detected] --> B(RSS-Monitor-Agent);
+    B -->|1. Sends Audio URL via Coral| C(Transcription-Agent);
+    C -->|2. Sends Transcript via Coral| D(Translation-Agent);
+    D -->|3. Sends Translated Text via Coral| E(Voice-Synthesis-Agent);
+    E -->|4. Sends New Audio URL via Coral| F(RSS-Publisher-Agent);
+    F --> G[End: Translated Episode Published];
+
+    subgraph External APIs
+        D -- Calls --> Mistral(Mistral AI API);
+        E -- Calls --> ElevenLabs(ElevenLabs API);
+        C -- Calls --> STT(Speech-to-Text API);
+    end
+
+    style A fill:#90EE90,stroke:#333,stroke-width:2px
+    style G fill:#90EE90,stroke:#333,stroke-width:2px
+    style B fill:#ADD8E6,stroke:#333,stroke-width:2px
+    style C fill:#ADD8E6,stroke:#333,stroke-width:2px
+    style D fill:#ADD8E6,stroke:#333,stroke-width:2px
+    style E fill:#ADD8E6,stroke:#333,stroke-width:2px
+    style F fill:#ADD8E6,stroke:#333,stroke-width:2px
+```
+
+### **Flow Breakdown:**
+
+1.  **`RSS-Monitor-Agent`** detects a new episode and initiates the workflow by passing the original audio URL to the next agent.
+2.  **`Transcription-Agent`** receives the audio, converts it to text using a Speech-to-Text API, and passes the resulting transcript onward.
+3.  **`Translation-Agent`** takes the transcript, translates it using **Mistral AI**, and sends the translated text to the synthesis agent.
+4.  **`Voice-Synthesis-Agent`** uses the podcaster's cloned voice on **ElevenLabs** to convert the translated text into a new audio file.
+5.  **`RSS-Publisher-Agent`** takes the final audio file URL and all the translated metadata (title, description) and updates the new, language-specific RSS feed.
 
 -----
 
