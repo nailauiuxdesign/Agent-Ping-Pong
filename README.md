@@ -3,7 +3,7 @@ This is the stub project for **Agent Ping Pong**, created for the Internet of Ag
 The goal is to start simple and then extend it using **Coral Protocol** to connect multiple agents.
 
 -----
-#  🎙️Global Podcaster App
+#  🎙️Global Podcaster
 
 ### **Global Podcaster: Breaking language barriers in podcasting**
 
