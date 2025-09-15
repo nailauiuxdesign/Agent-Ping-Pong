@@ -48,24 +48,23 @@ graph TD
 
 This diagram provides a high-level overview of the entire system, showing how the user, frontend, backend, agents, and external services all interact.
 
-```mermaid
 graph LR
-    subgraph User Interaction
-        User[Podcaster] -- Interacts via Browser --> Frontend[Frontend Web App <br> (React/Vue)];
+    subgraph "User Interaction"
+        User["Podcaster"] -- "Interacts via Browser" --> Frontend["Frontend Web App <br> (React/Vue)"];
     end
 
-    subgraph Your Application Infrastructure
-        Frontend -- HTTPS API Calls --> Backend[Backend Orchestrator <br> (Node.js/Python)];
-        Backend <--> DB[(Database <br> Users, RSS Feeds, Voice IDs)];
-        Backend -- Initiates Job --> Coral;
+    subgraph "Your Application Infrastructure"
+        Frontend -- "HTTPS API Calls" --> Backend["Backend Orchestrator <br> (Node.js/Python)"];
+        Backend <--> DB[("Database <br> Users, RSS Feeds, Voice IDs")];
+        Backend -- "Initiates Job" --> Coral;
         
-        subgraph Coral Protocol Network
-            Coral[Agent Network <br> (Coral Protocol)];
-            Agent1[RSS-Monitor-Agent];
-            Agent2[Transcription-Agent];
-            Agent3[Translation-Agent];
-            Agent4[Voice-Synthesis-Agent];
-            Agent5[RSS-Publisher-Agent];
+        subgraph "Coral Protocol Network"
+            Coral["Agent Network <br> (Coral Protocol)"];
+            Agent1["RSS-Monitor-Agent"];
+            Agent2["Transcription-Agent"];
+            Agent3["Translation-Agent"];
+            Agent4["Voice-Synthesis-Agent"];
+            Agent5["RSS-Publisher-Agent"];
         end
 
         Coral -.-> Agent1;
@@ -75,10 +74,10 @@ graph LR
         Coral -.-> Agent5;
     end
 
-    subgraph External Services
-        Agent3 -- API Call --> Mistral[Mistral AI];
-        Agent4 -- API Call --> ElevenLabs[ElevenLabs];
-        Agent2 -- API Call --> STT[AI/ML API <br> (Speech-to-Text)];
+    subgraph "External Services"
+        Agent3 -- "API Call" --> Mistral["Mistral AI"];
+        Agent4 -- "API Call" --> ElevenLabs["ElevenLabs"];
+        Agent2 -- "API Call" --> STT["AI/ML API <br> (Speech-to-Text)"];
     end
 
     style User fill:#D3D3D3,stroke:#333,stroke-width:2px
@@ -93,7 +92,6 @@ graph LR
     style Mistral fill:#FFDDC1,stroke:#333,stroke-width:1px
     style ElevenLabs fill:#FFDDC1,stroke:#333,stroke-width:1px
     style STT fill:#FFDDC1,stroke:#333,stroke-width:1px
-```
 
 ### **Architecture Breakdown:**
 
@@ -106,7 +104,8 @@ graph LR
 
 
 ```
-## 🚀 Getting Started
+## **Getting Started**
+
 ### Manual Setup
 > only the first time
 #### Clone the Coral Multi-Agent Demo repository:
