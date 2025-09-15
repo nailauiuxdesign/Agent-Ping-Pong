@@ -42,9 +42,9 @@ This project demonstrates how to build composable, language-agnostic agent workf
 * **Problem**: Podcasts have a global audience, but language barriers limit their reach. Dubbing a podcast is expensive and time-consuming.
 * **Solution**: A web app where a podcaster can submit their RSS feed. The app automatically fetches new episodes, transcribes them, translates the text into a target language, and then uses a clone of the host's voice to generate a fully translated audio episode. The new translated podcast gets its own RSS feed.
 * **Tech Stack**:
-    	* **Coral Protocol**: To orchestrate the entire pipeline: an "RSS Fetch Agent," a "Transcription Agent," a "Translation Agent," and a "Voice Synthesis Agent."
-     	* **ElevenLabs**: The star of the show for the voice cloning and audio generation.
-     	* **Mistral AI**: To provide high-quality, context-aware translations.
+	* **Coral Protocol**: To orchestrate the entire pipeline: an "RSS Fetch Agent," a "**Transcription Agent**," a "**Translation Agent**," and a "**Voice Synthesis Agent**."
+    * **ElevenLabs**: The star of the show for the voice cloning and audio generation.
+    * **Mistral AI**: To provide high-quality, context-aware translations.
 
 -----
 
