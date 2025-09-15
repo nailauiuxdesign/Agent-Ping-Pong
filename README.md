@@ -36,6 +36,110 @@ This project demonstrates how to build composable, language-agnostic agent workf
 - If an episode is very long, the translation may be limited by the `max_tokens` parameter in the translation agent.
 - To reset tracking for a feed, delete its corresponding `seen_episodes_<hash>.json` file.
 
+Of course. Here are the detailed diagrams for the **"Global Podcaster"** app, illustrating both the specific agent-to-agent workflow and the complete system architecture.
+
+-----
+
+## 1\. Agent Flow Diagram
+
+This diagram shows the step-by-step pipeline of how a new podcast episode is processed. The entire flow is orchestrated by **Coral Protocol**, which passes a job from one specialized agent to the next until the process is complete.
+
+```mermaid
+graph TD
+    A[Start: New Episode Detected] --> B(RSS-Monitor-Agent);
+    B -->|1. Sends Audio URL via Coral| C(Transcription-Agent);
+    C -->|2. Sends Transcript via Coral| D(Translation-Agent);
+    D -->|3. Sends Translated Text via Coral| E(Voice-Synthesis-Agent);
+    E -->|4. Sends New Audio URL via Coral| F(RSS-Publisher-Agent);
+    F --> G[End: Translated Episode Published];
+
+    subgraph External APIs
+        D -- Calls --> Mistral(Mistral AI API);
+        E -- Calls --> ElevenLabs(ElevenLabs API);
+        C -- Calls --> STT(Speech-to-Text API);
+    end
+
+    style A fill:#90EE90,stroke:#333,stroke-width:2px
+    style G fill:#90EE90,stroke:#333,stroke-width:2px
+    style B fill:#ADD8E6,stroke:#333,stroke-width:2px
+    style C fill:#ADD8E6,stroke:#333,stroke-width:2px
+    style D fill:#ADD8E6,stroke:#333,stroke-width:2px
+    style E fill:#ADD8E6,stroke:#333,stroke-width:2px
+    style F fill:#ADD8E6,stroke:#333,stroke-width:2px
+```
+
+### **Flow Breakdown:**
+
+1.  **`RSS-Monitor-Agent`** detects a new episode and initiates the workflow by passing the original audio URL to the next agent.
+2.  **`Transcription-Agent`** receives the audio, converts it to text using a Speech-to-Text API, and passes the resulting transcript onward.
+3.  **`Translation-Agent`** takes the transcript, translates it using **Mistral AI**, and sends the translated text to the synthesis agent.
+4.  **`Voice-Synthesis-Agent`** uses the podcaster's cloned voice on **ElevenLabs** to convert the translated text into a new audio file.
+5.  **`RSS-Publisher-Agent`** takes the final audio file URL and all the translated metadata (title, description) and updates the new, language-specific RSS feed.
+
+-----
+
+## 2\. Full Application Architecture Diagram
+
+This diagram provides a high-level overview of the entire system, showing how the user, frontend, backend, agents, and external services all interact.
+
+```mermaid
+graph LR
+    subgraph User Interaction
+        User[Podcaster] -- Interacts via Browser --> Frontend[Frontend Web App <br> (React/Vue)];
+    end
+
+    subgraph Your Application Infrastructure
+        Frontend -- HTTPS API Calls --> Backend[Backend Orchestrator <br> (Node.js/Python)];
+        Backend <--> DB[(Database <br> Users, RSS Feeds, Voice IDs)];
+        Backend -- Initiates Job --> Coral;
+        
+        subgraph Coral Protocol Network
+            Coral[Agent Network <br> (Coral Protocol)];
+            Agent1[RSS-Monitor-Agent];
+            Agent2[Transcription-Agent];
+            Agent3[Translation-Agent];
+            Agent4[Voice-Synthesis-Agent];
+            Agent5[RSS-Publisher-Agent];
+        end
+
+        Coral -.-> Agent1;
+        Coral -.-> Agent2;
+        Coral -.-> Agent3;
+        Coral -.-> Agent4;
+        Coral -.-> Agent5;
+    end
+
+    subgraph External Services
+        Agent3 -- API Call --> Mistral[Mistral AI];
+        Agent4 -- API Call --> ElevenLabs[ElevenLabs];
+        Agent2 -- API Call --> STT[AI/ML API <br> (Speech-to-Text)];
+    end
+
+    style User fill:#D3D3D3,stroke:#333,stroke-width:2px
+    style Frontend fill:#FFFACD,stroke:#333,stroke-width:2px
+    style Backend fill:#FFFACD,stroke:#333,stroke-width:2px
+    style DB fill:#FFFACD,stroke:#333,stroke-width:2px
+    style Agent1 fill:#ADD8E6,stroke:#333,stroke-width:1px
+    style Agent2 fill:#ADD8E6,stroke:#333,stroke-width:1px
+    style Agent3 fill:#ADD8E6,stroke:#333,stroke-width:1px
+    style Agent4 fill:#ADD8E6,stroke:#333,stroke-width:1px
+    style Agent5 fill:#ADD8E6,stroke:#333,stroke-width:1px
+    style Mistral fill:#FFDDC1,stroke:#333,stroke-width:1px
+    style ElevenLabs fill:#FFDDC1,stroke:#333,stroke-width:1px
+    style STT fill:#FFDDC1,stroke:#333,stroke-width:1px
+```
+
+### **Architecture Breakdown:**
+
+  * **User Interaction:** The podcaster interacts only with the **Frontend**, which is a clean, simple web interface for managing their account and podcasts.
+  * **Your Application Infrastructure:**
+      * The **Frontend** communicates with your **Backend** via a standard REST or GraphQL API.
+      * The **Backend** is the central brain. It handles user data, stores information in the **Database**, and most importantly, it acts as the **Orchestrator**. It is the only part of your system that directly tells the **Coral Protocol Network** to start a new job.
+      * The **Coral Protocol Network** is the communication layer for your agents. It ensures that jobs are passed reliably from one agent to the next. The agents themselves can be hosted as independent serverless functions.
+  * **External Services:** These are the third-party AI platforms that provide the core intelligence. Your agents are responsible for calling these APIs with the correct data and handling their responses.
+
+
+```
 ## 🚀 Getting Started
 ### Manual Setup
 > only the first time
