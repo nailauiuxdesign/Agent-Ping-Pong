@@ -37,7 +37,7 @@ This project demonstrates how to build composable, language-agnostic agent workf
 - To reset tracking for a feed, delete its corresponding `seen_episodes_<hash>.json` file.
 
 -----
-#  🎙️Global Podcaster App
+#  🎙️Global Podcaster
 
 ### **Global Podcaster: Breaking language barriers in podcasting**
 
