@@ -1,6 +1,40 @@
-# 🏓 Agent Ping Pong with Coral Protocol
-This is the stub project for **Agent Ping Pong**, created for the Internet of Agents Hackathon.  
-The goal is to start simple and then extend it using **Coral Protocol** to connect multiple agents.
+# 🏓 Global Podcaster App
+`Global Podcaster App` is a multi-agent pipeline that fetches podcast audio from any RSS feed, transcribes it to text using Deepgram, and translates the transcript to your target language using Mistral AI—all orchestrated via Coral Protocol.  
+This project demonstrates how to build composable, language-agnostic agent workflows for global podcast accessibility and discovery.
+
+## 🛠️ How the Automated Feed Monitoring Works
+
+### feeds.txt: Managing RSS Feeds
+- The `feeds.txt` file contains one RSS feed URL per line.
+- You can add or remove feeds at any time. Lines starting with `#` are comments and ignored.
+- Example:
+  ```
+  https://feeds.npr.org/500005/podcast.xml
+  https://feeds.megaphone.fm/sciencevs
+  #https://another-feed.com/rss
+  ```
+
+### seen_episodes files
+- For each RSS feed, the system creates a state file named `seen_episodes_<hash>.json`.
+- This file stores the identifiers of episodes already processed for that feed, preventing duplicate processing.
+- You can delete these files to force reprocessing of all episodes for a feed.
+
+### Monitoring process
+- The `monitor_feeds.py` script reads all URLs from `feeds.txt` and, every 2 minutes, runs the pipeline for each feed.
+- The pipeline flow is:
+  1. **rss-monitor-agent**: Detects new (unseen) episodes for each feed.
+  2. **rss-fetch-agent**: Fetches metadata for all episodes in the feed.
+  3. **transcription-agent**: Transcribes the audio of each new episode using Deepgram.
+  4. **translation-agent**: Translates the transcript using Mistral AI.
+  5. The final result is a JSON with title, audio_url, transcript, and translation for each new episode.
+
+### Customization
+- You can change the monitoring interval by editing the `POLL_INTERVAL` variable in `monitor_feeds.py` (value in seconds).
+- You can add/remove feeds at any time by editing `feeds.txt`.
+
+### Notes
+- If an episode is very long, the translation may be limited by the `max_tokens` parameter in the translation agent.
+- To reset tracking for a feed, delete its corresponding `seen_episodes_<hash>.json` file.
 
 ## 🚀 Getting Started
 ### Manual Setup
@@ -187,4 +221,7 @@ This variable will be automatically read by the translation agent. If it is miss
 ### How to run
 1. Open in GitHub Codespaces / devcontainer or locally
 2. Install dependencies: `pip install -r requirements.txt`
-3. Run simulation: `echo '{"sender": "user", "receiver": "orchestrator", "content": "https://feeds.megaphone.fm/sciencevs"}' | python3 agents/agent.py`
+3. Run monitor: `python3 monitor_feeds.py`
+
+> The monitor prints to the console how many feeds are pending and the progress for each one.
+> State files and results are stored in the project root directory.

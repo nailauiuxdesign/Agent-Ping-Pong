@@ -208,3 +208,6 @@ __marimo__/
 
 # Coral Multi-Agent Demo repository
 #./coral
+
+# Logs of seen episodes to avoid reprocessing
+seen_episodes*
