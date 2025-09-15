@@ -46,11 +46,11 @@ Global Podcaster is more than a tool; it's a bridge connecting creators and cult
 
 ### 1\. User Flow: From the Podcaster's Perspective
 
-This describes the journey a user (the podcaster) would take when interacting with your app.
+This describes the journey a user (the podcaster) would take when interacting with the app.
 
 **Step 1: Onboarding & Setup (One-time action)**
 
-1.  **Sign Up:** The podcaster creates an account on your web application.
+1.  **Sign Up:** The podcaster creates an account on the web application.
 2.  **Submit RSS Feed:** On their dashboard, they submit the public RSS feed URL of their original podcast (e.g., their Spotify or Apple Podcasts feed).
 3.  **Voice Cloning:**
       * The app prompts the podcaster to provide a voice sample for cloning.
@@ -61,7 +61,7 @@ This describes the journey a user (the podcaster) would take when interacting wi
 
 **Step 2: Automated Episode Processing (Ongoing)**
 
-1.  **Detection:** Your application's backend automatically checks the podcaster's original RSS feed periodically (e.g., every hour).
+1.  **Detection:** The application's backend automatically checks the podcaster's original RSS feed periodically (e.g., every hour).
 2.  **Processing:** When it detects a new episode, the entire agent pipeline is triggered automatically.
 3.  **Notification:** Once the translation is complete (this could take several minutes depending on the episode length), the podcaster receives an email notification: "Your new episode of '[Podcast Name] - Spanish Edition' is now live\!"
 4.  **Distribution:** The newly generated, translated episode is automatically added to the corresponding translated RSS feed, making it available on all platforms where that new feed has been added.
