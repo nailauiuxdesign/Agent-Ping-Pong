@@ -48,6 +48,7 @@ graph TD
 
 This diagram provides a high-level overview of the entire system, showing how the user, frontend, backend, agents, and external services all interact.
 
+```mermaid
 graph LR
     subgraph "User Interaction"
         User["Podcaster"] -- "Interacts via Browser" --> Frontend["Frontend Web App <br> (React/Vue)"];
@@ -92,6 +93,7 @@ graph LR
     style Mistral fill:#FFDDC1,stroke:#333,stroke-width:1px
     style ElevenLabs fill:#FFDDC1,stroke:#333,stroke-width:1px
     style STT fill:#FFDDC1,stroke:#333,stroke-width:1px
+```
 
 ### **Architecture Breakdown:**
 
@@ -103,7 +105,6 @@ graph LR
   * **External Services:** These are the third-party AI platforms that provide the core intelligence. Your agents are responsible for calling these APIs with the correct data and handling their responses.
 
 
-```
 ## **Getting Started**
 
 ### Manual Setup
