@@ -161,9 +161,9 @@ This architecture is robust, scalable, and perfectly aligns with the theme of th
 
 -----
 
-## 3\. Agent Flow Breakdown
+### 3\. Agent Flow Breakdown
 
-### Flow Diagram
+#### Flow Diagram
 
 This diagram shows the step-by-step pipeline of how a new podcast episode is processed. The entire flow is orchestrated by **Coral Protocol**, which passes a job from one specialized agent to the next until the process is complete.
 
@@ -191,7 +191,7 @@ graph TD
     style F fill:#ADD8E6,stroke:#333,stroke-width:2px
 ```
 
-### **Flow Breakdown:**
+#### **Flow Breakdown:**
 
 1.  **`RSS-Monitor-Agent`** detects a new episode and initiates the workflow by passing the original audio URL to the next agent.
 2.  **`Transcription-Agent`** receives the audio, converts it to text using a Speech-to-Text API, and passes the resulting transcript onward.
