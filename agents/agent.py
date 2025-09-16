@@ -2,16 +2,17 @@ import sys
 import json
 import subprocess
 
-def call_rss_fetch_agent(feed_url):
+
+def call_rss_monitor_agent(feed_url):
     proc = subprocess.Popen(
-        [sys.executable, "agents/rss-fetch-agent/agent.py"],
+        [sys.executable, "agents/rss-monitor-agent/agent.py"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         text=True
     )
     coral_msg = {
         "sender": "orchestrator",
-        "receiver": "rss-fetch-agent",
+        "receiver": "rss-monitor-agent",
         "content": feed_url
     }
     stdout, _ = proc.communicate(input=json.dumps(coral_msg) + "\n")
@@ -56,25 +57,38 @@ if __name__ == "__main__":
         try:
             msg = json.loads(line)
             feed_url = msg.get("content")
-            entries = call_rss_fetch_agent(feed_url)
-            print("DEBUG RSS ENTRIES:", entries, file=sys.stderr)
-            if not isinstance(entries, list) or not entries or not entries[0].get("audio_url"):
+            new_episodes = call_rss_monitor_agent(feed_url)
+            print("DEBUG NEW EPISODES:", new_episodes, file=sys.stderr)
+            if not isinstance(new_episodes, list) or not new_episodes:
                 response = {
                     "sender": "orchestrator",
                     "receiver": msg["sender"],
-                    "content": "No se encontro audio en el feed o hubo un error."
+                    "content": "No hay episodios nuevos."
                 }
                 print(json.dumps(response), flush=True)
                 continue
-            audio_url = entries[0]["audio_url"]
-            transcript = call_transcription_agent(audio_url)
-            # Traducción al idioma destino (por defecto español)
+            # Procesar cada episodio nuevo
+            results = []
             target_lang = msg.get("target_lang", "es")
-            translation = call_translation_agent(transcript, target_lang)
+            for ep in new_episodes:
+                audio_url = ep.get("audio_url")
+                if not audio_url:
+                    continue
+                print(f"DEBUG: Procesando audio_url: {audio_url}", file=sys.stderr)
+                transcript = call_transcription_agent(audio_url)
+                print(f"DEBUG: Transcript obtenido: {transcript[:100]}...", file=sys.stderr)
+                translation = call_translation_agent(transcript, target_lang)
+                print(f"DEBUG: Traducción obtenida: {translation[:100]}...", file=sys.stderr)
+                results.append({
+                    "title": ep.get("title"),
+                    "audio_url": audio_url,
+                    "transcript": transcript,
+                    "translation": translation
+                })
             response = {
                 "sender": "orchestrator",
                 "receiver": msg["sender"],
-                "content": translation
+                "content": results
             }
             print(json.dumps(response), flush=True)
         except Exception as e:

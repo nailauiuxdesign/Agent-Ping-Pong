@@ -159,7 +159,20 @@ registry:
         - option: "AUDIO_FILE_URL"
         - option: "DEEPGRAM_API_KEY"
 
+  rss_monitor:
+    options:
+      - name: "RSS_FEED_URL"
+        type: "string"
+        description: "URL del feed RSS a monitorear"
+        default: "https://example.com/rss"
+    runtime:
+      type: "executable"
+      command: [ "python3", "../agents/rss-monitor-agent/agent.py" ]
+      environment:
+        - option: "RSS_FEED_URL"
+
   translation-agent:
+    options: []
     runtime:
       type: "executable"
       command: [ "python3", "agents/translation-agent/agent.py" ]
