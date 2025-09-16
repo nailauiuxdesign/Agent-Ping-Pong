@@ -46,7 +46,8 @@ What if your podcast could instantly reach millions of new listeners in Japan, S
 
 We solve a major problem for creators: reaching international audiences is expensive, time-consuming, and often results in robotic, impersonal dubbing. Global Podcaster changes everything with a seamless, AI-powered workflow.
 
-## App Overview
+## Overview
+
 * **Track**: App Builder
 * **Problem**: Podcasts have a global audience, but language barriers limit their reach. Dubbing a podcast is expensive and time-consuming.
 * **Solution**: A web app where a podcaster can submit their RSS feed. The app automatically fetches new episodes, transcribes them, translates the text into a target language, and then uses a clone of the host's voice to generate a fully translated audio episode. The new translated podcast gets its own RSS feed.
@@ -54,6 +55,7 @@ We solve a major problem for creators: reaching international audiences is expen
 	* **Coral Protocol**: To orchestrate the entire pipeline: an "RSS Fetch Agent," a "**Transcription Agent**," a "**Translation Agent**," and a "**Voice Synthesis Agent**."
     * **ElevenLabs**: The star of the show for the voice cloning and audio generation.
     * **Mistral AI**: To provide high-quality, context-aware translations.
+    * **Frontend**: Simple web app for podcasters
  
 ## How It Works
 
@@ -78,6 +80,8 @@ Global Podcaster is more than a tool; it's a bridge connecting creators and cult
 
 -----
 
+## System Design & Architecture
+
 ### 1\. User Flow: From the Podcaster's Perspective
 
 This describes the journey a user (the podcaster) would take when interacting with the app.
@@ -101,7 +105,9 @@ This describes the journey a user (the podcaster) would take when interacting wi
 4.  **Distribution:** The newly generated, translated episode is automatically added to the corresponding translated RSS feed, making it available on all platforms where that new feed has been added.
 -----
 
-## 2\. Architecture Diagram
+### 2\. Application Architecture
+
+#### Architecture Diagram
 
 This diagram provides a high-level overview of the entire system, showing how the user, frontend, backend, agents, and external services all interact.
 
@@ -152,12 +158,7 @@ graph LR
     style STT fill:#FFDDC1,stroke:#333,stroke-width:1px
 ```
 
-Of course. Let's break down the **"Global Podcaster" App** into a detailed plan, covering user flows, specific agent tasks, and the overall application architecture. This will serve as a comprehensive blueprint for building the project during the hackathon.
-
 -----
-
-
-### Application Architecture
 
 This is how all the pieces fit together.
 
@@ -194,7 +195,9 @@ This architecture is robust, scalable, and perfectly aligns with the theme of th
 
 -----
 
-## 3\. Agent Flow Diagram
+## 3\. Agent Flow Breakdown
+
+### Flow Diagram
 
 This diagram shows the step-by-step pipeline of how a new podcast episode is processed. The entire flow is orchestrated by **Coral Protocol**, which passes a job from one specialized agent to the next until the process is complete.
 
