@@ -52,6 +52,13 @@ def call_translation_agent(text, target_lang="es"):
     response = json.loads(stdout)
     return response.get("content", "")
 
+def call_tts_agent(text, voice_id=None):
+    msg = {"sender":"orchestrator","receiver":"tts-agent","content":text}
+    if voice_id:
+        msg["voice_id"] = voice_id
+    return run_agent("agents/tts-agent/agent.py", msg)  # assuming run_agent returns parsed content
+
+
 if __name__ == "__main__":
     for line in sys.stdin:
         try:
@@ -90,6 +97,13 @@ if __name__ == "__main__":
                 "receiver": msg["sender"],
                 "content": results
             }
+
+            # previous flow produced 'translation' (string) and you may have language info
+            tts_result = call_tts_agent(translation, voice_id=os.getenv("TTS_DEFAULT_VOICE_ID"))
+            # tts_result expected to be a dict with audio_url
+            audio_url = tts_result.get("audio_url") or tts_result.get("content",{}).get("audio_url")
+            # now you can pass audio_url to RSS publisher or return it to the user
+
             print(json.dumps(response), flush=True)
         except Exception as e:
             import traceback
