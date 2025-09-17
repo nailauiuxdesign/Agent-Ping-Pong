@@ -1,11 +1,34 @@
 import sys
+import os
 import json
 import subprocess
 
 
+def run_agent(agent_path, msg):
+    """Ejecuta un agente y devuelve su salida procesada."""
+    proc = subprocess.Popen(
+        [sys.executable, agent_path],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
+    stdout, stderr = proc.communicate(input=json.dumps(msg) + "\n")
+    
+    if proc.returncode != 0:
+        raise RuntimeError(f"Agent at {agent_path} failed with error: {stderr}")
+    
+    try:
+        response = json.loads(stdout)
+    except json.JSONDecodeError:
+        raise ValueError(f"Invalid JSON response from agent at {agent_path}: {stdout}")
+    
+    return response
+
+
 def call_rss_monitor_agent(feed_url):
     proc = subprocess.Popen(
-        [sys.executable, "agents/rss-monitor-agent/agent.py"],
+        [sys.executable, "../../agents/rss-monitor-agent/agent.py"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         text=True
@@ -21,7 +44,7 @@ def call_rss_monitor_agent(feed_url):
 
 def call_transcription_agent(audio_url):
     proc = subprocess.Popen(
-        [sys.executable, "agents/transcription-agent/agent.py"],
+        [sys.executable, "../../agents/transcription-agent/agent.py"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         text=True
@@ -37,7 +60,7 @@ def call_transcription_agent(audio_url):
 
 def call_translation_agent(text, target_lang="es"):
     proc = subprocess.Popen(
-        [sys.executable, "agents/translation-agent/agent.py"],
+        [sys.executable, "../../agents/translation-agent/agent.py"],
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         text=True
@@ -52,13 +75,20 @@ def call_translation_agent(text, target_lang="es"):
     response = json.loads(stdout)
     return response.get("content", "")
 
+def call_tts_agent(text, voice_id=None):
+    msg = {"sender": "orchestrator", "receiver": "tts-agent", "content": text}
+    if voice_id:
+        msg["voice_id"] = voice_id
+    return run_agent("../../agents/tts-agent/agent.py", msg)  # assuming run_agent returns parsed content
+
+
 if __name__ == "__main__":
     for line in sys.stdin:
         try:
             msg = json.loads(line)
             feed_url = msg.get("content")
             new_episodes = call_rss_monitor_agent(feed_url)
-            print("DEBUG NEW EPISODES:", new_episodes, file=sys.stderr)
+            print("DEBUG NEW EPISODES:", new_episodes)
             if not isinstance(new_episodes, list) or not new_episodes:
                 response = {
                     "sender": "orchestrator",
@@ -78,18 +108,26 @@ if __name__ == "__main__":
                 transcript = call_transcription_agent(audio_url)
                 print(f"DEBUG: Transcript obtenido: {transcript[:100]}...", file=sys.stderr)
                 translation = call_translation_agent(transcript, target_lang)
-                print(f"DEBUG: Traducción obtenida: {translation[:100]}...", file=sys.stderr)
+                #print(f"DEBUG: Traducción obtenida: {translation[:100]}...", file=sys.stderr)
+                
+                # Llamar al agente TTS para generar el audio
+                #tts_result = call_tts_agent(translation, voice_id=os.getenv("TTS_DEFAULT_VOICE_ID"))
+                #tts_audio_url = tts_result.get("audio_url") or tts_result.get("content", {}).get("audio_url")
+                
+                # Agregar el audio_url generado al resultado
                 results.append({
                     "title": ep.get("title"),
                     "audio_url": audio_url,
                     "transcript": transcript,
                     "translation": translation
+                    #"tts_audio_url": tts_audio_url  # Nuevo campo para el audio generado
                 })
             response = {
                 "sender": "orchestrator",
                 "receiver": msg["sender"],
                 "content": results
             }
+
             print(json.dumps(response), flush=True)
         except Exception as e:
             import traceback

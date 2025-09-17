@@ -129,11 +129,19 @@ registry:
         type: "string"
         description: "Nombre del agente"
         default: "PingPongAgent"
+      - name: "DEEPGRAM_API_KEY"
+        type: "string"
+        description: "Deepgram API key for transcription"
+      - name: "MISTRAL_API_KEY"
+        type: "string"
+        description: "Mistral API key for translation"
     runtime:
       type: "executable"
       command: [ "python3", "../agents/agent.py" ]
       environment:
         - option: "AGENT_NAME"
+        - option: "DEEPGRAM_API_KEY"
+        - option: "MISTRAL_API_KEY"
   
   rss_fetch:
     options:
@@ -143,15 +151,31 @@ registry:
         default: "https://example.com/rss"
     runtime:
       type: "executable"
-      command: [ "python3", "../agents/rss-fetch-agent/agent.py" ]
+      command: [ "python3", "../../agents/rss-fetch-agent/agent.py" ]
       environment:
         - option: "RSS_FEED_URL"
   
+
+  rss_fetch_http:
+    options:
+      - name: "PORT"
+        type: "number"
+        description: "Puerto donde corre el agente HTTP"
+        default: 8000
+    runtime:
+      type: "executable"
+      command: ["python3", "../agents/rss-fetch-agent/rss_fetch_agent_http.py"]
+      environment:
+        - option: "PORT"
+
   transcription:
     options:
       - name: "AUDIO_FILE_URL"
         type: "string"
         description: "URL del archivo de audio a transcribir"
+      - name: "DEEPGRAM_API_KEY"
+        type: "string"
+        description: "Deepgram API key for transcription"
     runtime:
       type: "executable"
       command: ["python3", "../agents/transcription-agent/agent.py"]
@@ -172,7 +196,10 @@ registry:
         - option: "RSS_FEED_URL"
 
   translation-agent:
-    options: []
+    options:
+      - name: "MISTRAL_API_KEY"
+        type: "string"
+        description: "Mistral API key for translation"
     runtime:
       type: "executable"
       command: [ "python3", "agents/translation-agent/agent.py" ]
