@@ -176,3 +176,19 @@ registry:
     runtime:
       type: "executable"
       command: [ "python3", "agents/translation-agent/agent.py" ]
+  
+  tts-agent:
+    options:
+      - name: "VOICE_ID"
+        type: "string"
+        description: "ID de la voz a utilizar para la síntesis de texto a voz"
+        default: "default"
+      - name: "TTS_API_KEY"
+        type: "string"
+        description: "API key para el servicio de TTS"
+    runtime:
+      type: "executable"
+      command: [ "python3", "../agents/tts-agent/agent.py" ]
+      environment:
+        - option: "VOICE_ID"
+        - option: "TTS_API_KEY"
