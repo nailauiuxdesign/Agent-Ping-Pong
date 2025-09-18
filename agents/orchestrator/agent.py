@@ -111,7 +111,7 @@ if __name__ == "__main__":
                 #print(f"DEBUG: Traducción obtenida: {translation[:100]}...", file=sys.stderr)
                 
                 # Llamar al agente TTS para generar el audio
-                #tts_result = call_tts_agent(translation, voice_id=os.getenv("TTS_DEFAULT_VOICE_ID"))
+                tts_result = call_tts_agent(translation, voice_id=os.getenv("TTS_DEFAULT_VOICE_ID"))
                 #tts_audio_url = tts_result.get("audio_url") or tts_result.get("content", {}).get("audio_url")
                 
                 # Agregar el audio_url generado al resultado

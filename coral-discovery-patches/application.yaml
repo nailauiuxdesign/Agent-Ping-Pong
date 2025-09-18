@@ -123,7 +123,7 @@ registry:
         - option: "MODEL_TEMPERATURE"
         - option: "TIMEOUT_MS"
 
-  tioa8:
+  orchestrator:
     options:
       - name: "AGENT_NAME"
         type: "string"
@@ -137,7 +137,7 @@ registry:
         description: "Mistral API key for translation"
     runtime:
       type: "executable"
-      command: [ "python3", "../agents/agent.py" ]
+      command: [ "python3", "../../agents/orchestrator/agent.py" ]
       environment:
         - option: "AGENT_NAME"
         - option: "DEEPGRAM_API_KEY"
@@ -155,19 +155,6 @@ registry:
       environment:
         - option: "RSS_FEED_URL"
   
-
-  rss_fetch_http:
-    options:
-      - name: "PORT"
-        type: "number"
-        description: "Puerto donde corre el agente HTTP"
-        default: 8000
-    runtime:
-      type: "executable"
-      command: ["python3", "../agents/rss-fetch-agent/rss_fetch_agent_http.py"]
-      environment:
-        - option: "PORT"
-
   transcription:
     options:
       - name: "AUDIO_FILE_URL"
@@ -178,7 +165,7 @@ registry:
         description: "Deepgram API key for transcription"
     runtime:
       type: "executable"
-      command: ["python3", "../agents/transcription-agent/agent.py"]
+      command: ["python3", "../../agents/transcription-agent/agent.py"]
       environment:
         - option: "AUDIO_FILE_URL"
         - option: "DEEPGRAM_API_KEY"
@@ -191,7 +178,7 @@ registry:
         default: "https://example.com/rss"
     runtime:
       type: "executable"
-      command: [ "python3", "../agents/rss-monitor-agent/agent.py" ]
+      command: [ "python3", "../../agents/rss-monitor-agent/agent.py" ]
       environment:
         - option: "RSS_FEED_URL"
 
@@ -202,8 +189,10 @@ registry:
         description: "Mistral API key for translation"
     runtime:
       type: "executable"
-      command: [ "python3", "agents/translation-agent/agent.py" ]
-  
+      command: [ "python3", "../../agents/translation-agent/agent.py" ]
+      environment:
+        - option: "MISTRAL_API_KEY"
+
   tts-agent:
     options:
       - name: "VOICE_ID"
@@ -215,7 +204,29 @@ registry:
         description: "API key para el servicio de TTS"
     runtime:
       type: "executable"
-      command: [ "python3", "../agents/tts-agent/agent.py" ]
+      command: [ "python3", "../../agents/tts-agent/agent.py" ]
       environment:
         - option: "VOICE_ID"
         - option: "TTS_API_KEY"
+
+  feed-monitor-agent:
+    options:
+      - name: "FEEDS_FILE"
+        type: "string"
+        description: "Ruta al archivo de feeds"
+        default: "feeds.txt"
+      - name: "POLL_INTERVAL"
+        type: "number"
+        description: "Intervalo de monitoreo en segundos"
+        default: 120
+      - name: "ORCHESTRATOR_URL"
+        type: "string"
+        description: "URL del orquestador HTTP"
+        default: "http://localhost:8000/message"
+    runtime:
+      type: "executable"
+      command: [ "python3", "../../agents/feed-monitor-agent/agent.py" ]
+      environment:
+        - option: "FEEDS_FILE"
+        - option: "POLL_INTERVAL"
+        - option: "ORCHESTRATOR_URL"
