@@ -1,48 +1,10 @@
-# 🏓 Global Podcaster App
+# 🎙️Global Podcaster
 `Global Podcaster App` is a multi-agent pipeline that fetches podcast audio from any RSS feed, transcribes it to text using Deepgram, and translates the transcript to your target language using Mistral AI—all orchestrated via Coral Protocol.  
 This project demonstrates how to build composable, language-agnostic agent workflows for global podcast accessibility and discovery.
 
-## 🛠️ How the Automated Feed Monitoring Works
-
-### feeds.txt: Managing RSS Feeds
-- The `feeds.txt` file contains one RSS feed URL per line.
-- You can add or remove feeds at any time. Lines starting with `#` are comments and ignored.
-- Example:
-  ```
-  https://feeds.npr.org/500005/podcast.xml
-  https://feeds.megaphone.fm/sciencevs
-  #https://another-feed.com/rss
-  ```
-
-### seen_episodes files
-- For each RSS feed, the system creates a state file named `seen_episodes_<hash>.json`.
-- This file stores the identifiers of episodes already processed for that feed, preventing duplicate processing.
-- You can delete these files to force reprocessing of all episodes for a feed.
-
-### Monitoring process
-- The `monitor_feeds.py` script reads all URLs from `feeds.txt` and, every 2 minutes, runs the pipeline for each feed.
-- The pipeline flow is:
-  1. **rss-monitor-agent**: Detects new (unseen) episodes for each feed.
-  2. **rss-fetch-agent**: Fetches metadata for all episodes in the feed.
-  3. **transcription-agent**: Transcribes the audio of each new episode using Deepgram.
-  4. **translation-agent**: Translates the transcript using Mistral AI.
-  5. The final result is a JSON with title, audio_url, transcript, and translation for each new episode.
-
-### Customization
-- You can change the monitoring interval by editing the `POLL_INTERVAL` variable in `monitor_feeds.py` (value in seconds).
-- You can add/remove feeds at any time by editing `feeds.txt`.
-
-### Notes
-- If an episode is very long, the translation may be limited by the `max_tokens` parameter in the translation agent.
-- To reset tracking for a feed, delete its corresponding `seen_episodes_<hash>.json` file.
-
------
-#  🎙️Global Podcaster
-
-### **Global Podcaster: Breaking language barriers in podcasting**
+### **Breaking language barriers in podcasting**
 
 What if your podcast could instantly reach millions of new listeners in Japan, Spain, or Germany, all while speaking in **your own authentic voice**? Global Podcaster is a revolutionary platform that breaks the language barrier for content creators, turning your local podcast into a global phenomenon. 
-
 
 We solve a major problem for creators: reaching international audiences is expensive, time-consuming, and often results in robotic, impersonal dubbing. Global Podcaster changes everything with a seamless, AI-powered workflow.
 
@@ -427,3 +389,36 @@ This variable will be automatically read by the translation agent. If it is miss
 > State files and results are stored in the project root directory.
 
 
+## 🛠️ How the Automated Feed Monitoring Works
+
+### feeds.txt: Managing RSS Feeds
+- The `feeds.txt` file contains one RSS feed URL per line.
+- You can add or remove feeds at any time. Lines starting with `#` are comments and ignored.
+- Example:
+  ```
+  https://feeds.npr.org/500005/podcast.xml
+  https://feeds.megaphone.fm/sciencevs
+  #https://another-feed.com/rss
+  ```
+
+### seen_episodes files
+- For each RSS feed, the system creates a state file named `seen_episodes_<hash>.json`.
+- This file stores the identifiers of episodes already processed for that feed, preventing duplicate processing.
+- You can delete these files to force reprocessing of all episodes for a feed.
+
+### Monitoring process
+- The `monitor_feeds.py` script reads all URLs from `feeds.txt` and, every 2 minutes, runs the pipeline for each feed.
+- The pipeline flow is:
+  1. **rss-monitor-agent**: Detects new (unseen) episodes for each feed.
+  2. **rss-fetch-agent**: Fetches metadata for all episodes in the feed.
+  3. **transcription-agent**: Transcribes the audio of each new episode using Deepgram.
+  4. **translation-agent**: Translates the transcript using Mistral AI.
+  5. The final result is a JSON with title, audio_url, transcript, and translation for each new episode.
+
+### Customization
+- You can change the monitoring interval by editing the `POLL_INTERVAL` variable in `monitor_feeds.py` (value in seconds).
+- You can add/remove feeds at any time by editing `feeds.txt`.
+
+### Notes
+- If an episode is very long, the translation may be limited by the `max_tokens` parameter in the translation agent.
+- To reset tracking for a feed, delete its corresponding `seen_episodes_<hash>.json` file.
