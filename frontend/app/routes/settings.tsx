@@ -5,39 +5,24 @@ import { Label } from "~/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
 import { Badge } from "~/components/ui/badge";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { motion } from "framer-motion";
-import { 
-  User as UserIcon, 
-  Mic, 
-  Languages, 
-  Shield, 
+import {
+  User as UserIcon,
+  Mic,
+  Languages,
   Bell,
   Upload,
   Trash2,
   CheckCircle
 } from "lucide-react";
-
-// Mock API functions
-const User = {
-  me: () => Promise.resolve({
-    id: 1,
-    full_name: "John Doe",
-    email: "john@example.com",
-    onboarding_completed: true,
-    preferred_languages: ['es', 'fr'],
-    notification_preferences: { email_alerts: true },
-    voice_sample_url: null
-  }),
-  updateMyUserData: (data) => Promise.resolve({ 
-    success: true, 
-    message: "Settings updated successfully",
-    data: data
-  })
-};
+import { useAuth } from "hooks/useAuth";
+import { useApp } from "contexts/appContext";
 
 const Settings = () => {
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isAuthenticated } = useAuth();
+  const { updateUser, uploadVoiceSample, state } = useApp();
+  
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState({ type: '', text: '' });
   const [formData, setFormData] = useState({
@@ -47,49 +32,26 @@ const Settings = () => {
   });
 
   useEffect(() => {
-    loadUserData();
-  }, []);
-
-  const loadUserData = async () => {
-    try {
-      const userData = await User.me();
-      setUser(userData);
+    if (user) {
       setFormData({
-        full_name: userData.full_name || '',
-        preferred_languages: userData.preferred_languages || [],
-        notification_preferences: userData.notification_preferences || { email_alerts: true }
+        full_name: user.full_name || '',
+        preferred_languages: user.preferred_languages || [],
+        notification_preferences: user.notification_preferences || { email_alerts: true }
       });
-    } catch (error) {
-      console.error("Error loading user data:", error);
-      setSaveMessage({ type: 'error', text: 'Failed to load user data' });
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [user]);
 
-  const handleSave = async (section) => {
+  const handleSave = async (section: string) => {
     setIsSaving(true);
     setSaveMessage({ type: '', text: '' });
-    
     try {
-      const response = await User.updateMyUserData(formData);
-      
-      if (response.success) {
-        setSaveMessage({ type: 'success', text: `${section} settings saved successfully!` });
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          setSaveMessage({ type: '', text: '' });
-        }, 3000);
-        
-        // Refresh data to ensure we have the latest from server
-        await loadUserData();
-      } else {
-        setSaveMessage({ type: 'error', text: response.message || 'Failed to save settings' });
-      }
-    } catch (error) {
-      console.error("Error saving settings:", error);
-      setSaveMessage({ type: 'error', text: 'Failed to save settings' });
+      await updateUser(formData);
+      setSaveMessage({ type: 'success', text: `${section} settings saved successfully!` });
+      setTimeout(() => {
+        setSaveMessage({ type: '', text: '' });
+      }, 3000);
+    } catch (error: any) {
+      setSaveMessage({ type: 'error', text: error.message || 'Failed to save settings' });
     } finally {
       setIsSaving(false);
     }
@@ -108,21 +70,35 @@ const Settings = () => {
     { code: 'hi', name: 'Hindi' }
   ];
 
-  const toggleLanguage = (languageCode) => {
+  const toggleLanguage = (languageCode: string) => {
     const current = formData.preferred_languages || [];
     const updated = current.includes(languageCode)
       ? current.filter(lang => lang !== languageCode)
       : [...current, languageCode];
-    
     setFormData(prev => ({ ...prev, preferred_languages: updated }));
   };
 
-  const handleVoiceUpload = () => {
-    // Mock voice upload functionality
-    setSaveMessage({ type: 'info', text: 'Voice upload functionality would be implemented here' });
+  const handleVoiceUpload = async (file: File) => {
+    try {
+      await uploadVoiceSample(file);
+      setSaveMessage({ type: 'success', text: 'Voice sample uploaded successfully!' });
+      setTimeout(() => {
+        setSaveMessage({ type: '', text: '' });
+      }, 3000);
+    } catch (error: any) {
+      setSaveMessage({ type: 'error', text: error.message || 'Failed to upload voice sample' });
+    }
   };
 
-  if (isLoading) {
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl font-medium text-gray-600">Please log in to access settings</div>
+      </div>
+    );
+  }
+
+  if (state.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-pulse flex items-center gap-3">
@@ -136,7 +112,7 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center p-6 md:p-8">
       <div className="max-w-4xl mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
@@ -144,18 +120,16 @@ const Settings = () => {
         >
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Settings</h1>
           <p className="text-gray-600">Manage your account and translation preferences</p>
-          
-          {/* Save message notification */}
           {saveMessage.text && (
-            <div className={`mt-4 p-3 rounded-lg ${
-              saveMessage.type === 'success' 
-                ? 'bg-green-100 text-green-800 border border-green-200' 
+            <Alert className={`mt-4 ${
+              saveMessage.type === 'success'
+                ? 'bg-green-100 text-green-800 border-green-200'
                 : saveMessage.type === 'error'
-                ? 'bg-red-100 text-red-800 border border-red-200'
-                : 'bg-blue-100 text-blue-800 border border-blue-200'
+                ? 'bg-red-100 text-red-800 border-red-200'
+                : 'bg-blue-100 text-blue-800 border-blue-200'
             }`}>
-              {saveMessage.text}
-            </div>
+              <AlertDescription>{saveMessage.text}</AlertDescription>
+            </Alert>
           )}
         </motion.div>
 
@@ -182,13 +156,14 @@ const Settings = () => {
                       value={formData.full_name}
                       onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
                       className="mt-1"
+                      disabled={isSaving}
                     />
                   </div>
                   <div>
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
-                      value={user?.email}
+                      value={user.email}
                       disabled
                       className="mt-1 bg-gray-50 text-gray-500"
                     />
@@ -196,7 +171,7 @@ const Settings = () => {
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <Button 
+                  <Button
                     onClick={() => handleSave('Profile')}
                     disabled={isSaving}
                     className="bg-blue-600 hover:bg-blue-700"
@@ -222,7 +197,7 @@ const Settings = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {user?.voice_sample_url ? (
+                {user.voice_sample_url ? (
                   <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
                     <div className="flex items-center gap-3">
                       <CheckCircle className="w-5 h-5 text-green-600" />
@@ -231,11 +206,21 @@ const Settings = () => {
                         <p className="text-sm text-green-700">Your voice is ready for translation</p>
                       </div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleVoiceUpload(file);
+                      }}
+                      className="hidden"
+                      id="voice-upload-replace"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="text-red-600 hover:text-red-700"
-                      onClick={handleVoiceUpload}
+                      onClick={() => document.getElementById('voice-upload-replace')?.click()}
                     >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Replace
@@ -246,9 +231,19 @@ const Settings = () => {
                     <Mic className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No voice sample</h3>
                     <p className="text-gray-600 mb-4">Upload a 1-5 minute audio sample to enable voice cloning</p>
-                    <Button 
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleVoiceUpload(file);
+                      }}
+                      className="hidden"
+                      id="voice-upload"
+                    />
+                    <Button
                       className="bg-purple-600 hover:bg-purple-700"
-                      onClick={handleVoiceUpload}
+                      onClick={() => document.getElementById('voice-upload')?.click()}
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       Upload Voice Sample
@@ -302,7 +297,7 @@ const Settings = () => {
                       Selected: <span className="font-medium">{formData.preferred_languages?.length || 0}</span> languages
                     </p>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => handleSave('Language')}
                     disabled={isSaving}
                     className="bg-teal-600 hover:bg-teal-700"
@@ -335,16 +330,19 @@ const Settings = () => {
                   </div>
                   <Switch
                     checked={formData.notification_preferences?.email_alerts}
-                    onCheckedChange={(checked) => 
-                      setFormData(prev => ({ 
-                        ...prev, 
-                        notification_preferences: { ...prev.notification_preferences, email_alerts: checked }
+                    onCheckedChange={(checked) =>
+                      setFormData(prev => ({
+                        ...prev,
+                        notification_preferences: {
+                          ...prev.notification_preferences,
+                          email_alerts: checked
+                        }
                       }))
                     }
                   />
                 </div>
                 <div className="flex justify-end">
-                  <Button 
+                  <Button
                     onClick={() => handleSave('Notification')}
                     disabled={isSaving}
                     className="bg-orange-600 hover:bg-orange-700"
@@ -359,6 +357,6 @@ const Settings = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Settings;

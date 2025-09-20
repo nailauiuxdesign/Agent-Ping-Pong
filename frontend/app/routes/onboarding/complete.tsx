@@ -4,72 +4,37 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { motion } from "framer-motion";
-import { 
-  CheckCircle, 
-  ArrowRight, 
-  Copy, 
+import {
+  CheckCircle,
+  ArrowRight,
+  Copy,
   ExternalLink,
   Globe,
   Mic,
   Languages,
   Rss
 } from "lucide-react";
-
-// Mock API functions
-const User = {
-  me: () => Promise.resolve({
-    id: 1,
-    full_name: "John Doe",
-    email: "john@example.com",
-    onboarding_completed: true,
-    preferred_languages: ['es', 'fr', 'de'],
-    voice_sample_url: 'https://storage.example.com/voice-samples/sample.mp3'
-  })
-};
-
-const Podcast = {
-  list: () => Promise.resolve([
-    {
-      id: 1,
-      title: "Tech Talk Daily",
-      description: "Daily discussions about the latest in technology",
-      original_language: "English",
-      cover_image: "https://via.placeholder.com/150/4F46E5/FFFFFF?text=TT",
-      episode_count: 45,
-      created_date: "2024-01-15",
-      updated_date: "2024-09-10"
-    }
-  ])
-};
+import { useAuth } from "hooks/useAuth";
+import { usePodcasts } from "hooks/usePodcast";
 
 export default function OnboardingComplete() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [podcast, setPodcast] = useState(null);
-  const [generatedFeeds, setGeneratedFeeds] = useState([]);
+  const { user } = useAuth();
+  const { podcasts, refreshData } = usePodcasts();
+  const [generatedFeeds, setGeneratedFeeds] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadCompletionData = async () => {
-      try {
-        const [userData, podcastsData] = await Promise.all([
-          User.me(),
-          Podcast.list()
-        ]);
-        
-        setUser(userData);
-        if (podcastsData.length > 0) {
-          setPodcast(podcastsData[0]);
-          generateTranslatedFeeds(podcastsData[0], userData.preferred_languages || []);
-        }
-      } catch (error) {
-        console.error("Error loading completion data:", error);
-      }
-    };
+    // Load the latest podcast data
+    refreshData();
+  }, [refreshData]);
 
-    loadCompletionData();
-  }, []);
+  useEffect(() => {
+    if (podcasts.length > 0 && user?.preferred_languages) {
+      generateTranslatedFeeds(podcasts[0], user.preferred_languages);
+    }
+  }, [podcasts, user]);
 
-  const generateTranslatedFeeds = (podcastData, languages) => {
+  const generateTranslatedFeeds = (podcastData: any, languages: string[]) => {
     const feeds = languages.map(langCode => ({
       language: langCode,
       url: `https://feeds.globalpodcaster.com/${podcastData.id}-${langCode}.xml`,
@@ -78,10 +43,10 @@ export default function OnboardingComplete() {
     setGeneratedFeeds(feeds);
   };
 
-  const getLanguageName = (code) => {
-    const languages = {
+  const getLanguageName = (code: string) => {
+    const languages: { [key: string]: string } = {
       'es': 'Spanish',
-      'fr': 'French', 
+      'fr': 'French',
       'de': 'German',
       'pt': 'Portuguese',
       'it': 'Italian',
@@ -100,7 +65,7 @@ export default function OnboardingComplete() {
     return languages[code] || code.toUpperCase();
   };
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     // Could add a toast notification here
   };
@@ -109,7 +74,7 @@ export default function OnboardingComplete() {
     {
       icon: Rss,
       title: "RSS Feed Added",
-      description: podcast?.title || "Your podcast",
+      description: podcasts[0]?.title || "Your podcast",
       status: "complete"
     },
     {
@@ -128,7 +93,7 @@ export default function OnboardingComplete() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -145,13 +110,13 @@ export default function OnboardingComplete() {
               <CheckCircle className="w-10 h-10 text-white" />
             </motion.div>
             <CardTitle className="text-3xl md:text-4xl font-bold text-gray-900">
-              Setup Complete! 🎉
+              Setup Complete!
             </CardTitle>
             <p className="text-lg text-gray-600 mt-2">
               Your podcast is ready for global distribution
             </p>
           </CardHeader>
-          
+
           <CardContent className="space-y-8 px-8 pb-8">
             {/* Setup Summary */}
             <div className="grid md:grid-cols-3 gap-4">
@@ -164,7 +129,7 @@ export default function OnboardingComplete() {
                   className="text-center p-4 rounded-xl bg-white shadow-sm border"
                 >
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${
-                    step.status === 'complete' 
+                    step.status === 'complete'
                       ? 'bg-green-100 text-green-600'
                       : 'bg-gray-100 text-gray-400'
                   }`}>
@@ -220,7 +185,7 @@ export default function OnboardingComplete() {
                   ))}
                 </div>
                 <p className="text-sm text-gray-600 mt-3">
-                  ℹ️ These feeds will become active once your first episodes are translated (usually within 24-48 hours)
+                  These feeds will become active once your first episodes are translated (usually within 24-48 hours)
                 </p>
               </motion.div>
             )}
