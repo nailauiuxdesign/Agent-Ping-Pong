@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -6,16 +6,20 @@ import { Label } from "~/components/ui/label";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Link, useNavigate } from "react-router-dom";
 import { Globe, Mic, Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+import { useAuth } from "hooks/useAuth";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 
 export const meta = () => {
   return [
     { title: "Global Podcaster | Login" },
     { name: "description", content: "Create Podcast in multiple languages with your voice" },
   ];
-}
+};
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, isLoading, error, isAuthenticated, user } = useAuth();
+  
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -23,18 +27,34 @@ const Login = () => {
     rememberMe: false
   });
 
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.onboarding_completed) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding/rss-feed');
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
-    setFormData({ 
-      ...formData, 
-      [name]: type === "checkbox" ? checked : value 
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Navigate to dashboard (without actual authentication)
-    navigate('/dashboard');
+    try {
+      await login(formData.email, formData.password);
+      // Navigation will be handled by the useEffect above
+    } catch (err) {
+      // Error is handled by the context
+      console.error('Login failed:', err);
+    }
   };
 
   return (
@@ -60,85 +80,97 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-charcoal">
-                Email Address
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-medium-gray" />
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className="pl-10 h-12 transition-smooth focus:ring-2 focus:ring-ocean-blue"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-charcoal">
-                Password
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-medium-gray" />
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  className="pl-10 pr-10 h-12 transition-smooth focus:ring-2 focus:ring-ocean-blue"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-medium-gray hover:text-charcoal transition-smooth"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="rememberMe" 
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onCheckedChange={(checked) => 
-                    setFormData({ ...formData, rememberMe: checked as boolean })
-                  }
-                />
-                <Label 
-                  htmlFor="rememberMe" 
-                  className="text-sm text-medium-gray cursor-pointer"
-                >
-                  Remember me
+              {/* Email Field */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium text-charcoal">
+                  Email Address
                 </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-medium-gray" />
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="pl-10 h-12 transition-smooth focus:ring-2 focus:ring-ocean-blue"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
               </div>
-              <Link 
-                to="/forgot-password" 
-                className="text-sm text-ocean-blue hover:text-soft-teal transition-smooth font-medium"
-              >
-                Forgot password?
-              </Link>
-            </div>
 
-            {/* Sign In Button */}
-            <Button type="submit" size="lg" className="w-full h-12 group">
-              Sign In
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </Button>
+              {/* Password Field */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-charcoal">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-medium-gray" />
+                  <Input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    className="pl-10 pr-10 h-12 transition-smooth focus:ring-2 focus:ring-ocean-blue"
+                    required
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3 text-medium-gray hover:text-charcoal transition-smooth"
+                    disabled={isLoading}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Remember Me & Forgot Password */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="rememberMe"
+                    name="rememberMe"
+                    checked={formData.rememberMe}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, rememberMe: checked as boolean })
+                    }
+                    disabled={isLoading}
+                  />
+                  <Label htmlFor="rememberMe" className="text-sm text-medium-gray cursor-pointer">
+                    Remember me
+                  </Label>
+                </div>
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-ocean-blue hover:text-soft-teal transition-smooth font-medium"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+
+              {/* Sign In Button */}
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="w-full h-12 group"
+                disabled={isLoading}
+              >
+                {isLoading ? "Signing in..." : "Sign In"}
+                <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+              </Button>
             </form>
 
             {/* Sign Up Link */}
