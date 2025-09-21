@@ -1,6 +1,6 @@
 import type { User } from "types";
 
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:5555';
 
 interface ApiResponse<T = any> {
   data: T;
@@ -34,14 +34,14 @@ async function fetchWithAuth(url: string, options: RequestInit = {}): Promise<Re
   if (!response.ok) {
     const error = await response.text();
     let errorMessage = 'An error occurred';
-    
+
     try {
       const errorData = JSON.parse(error);
       errorMessage = errorData.message || errorData.detail || errorMessage;
     } catch {
       errorMessage = error || `HTTP ${response.status}`;
     }
-    
+
     throw new ApiError(response.status, errorMessage);
   }
 
