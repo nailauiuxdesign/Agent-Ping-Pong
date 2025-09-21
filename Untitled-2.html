@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Podcaster - Market Opportunity</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: #333;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #2E4053 0%, #5D6D7E 100%);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .section {
+            margin-bottom: 25px;
+        }
+        
+        h2 {
+            color: #2E4053;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #5D6D7E;
+        }
+        
+        .market-chart {
+            height: 300px;
+            position: relative;
+        }
+        
+        .market-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .market-label {
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            color: white;
+            width: 30%;
+        }
+        
+        .tam {
+            background: #2E4053;
+        }
+        
+        .sam {
+            background: #5D6D7E;
+        }
+        
+        .som {
+            background: #85929E;
+        }
+        
+        .swot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .swot-item {
+            padding: 35px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .strengths {
+            background: #e8f5e9;
+            border-left: 5px solid #4caf50;
+        }
+        
+        .weaknesses {
+            background: #ffebee;
+            border-left: 5px solid #f44336;
+        }
+        
+        .opportunities {
+            background: #e3f2fd;
+            border-left: 5px solid #2196f3;
+        }
+        
+        .threats {
+            background: #fff8e1;
+            border-left: 5px solid #ffc107;
+        }
+        
+        .swot-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .swot-title span {
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #5D6D7E;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2E4053;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .footnote {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            border-top: 1px solid #dee2e6;
+            margin-top: 20px;
+        }
+        
+        .download-btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 12px;
+            background: #2E4053;
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #3d5166;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Global Podcaster</h1>
+            <p class="subtitle">Market Opportunity Analysis</p>
+        </header>
+        
+        <div class="content">
+            <div class="left-panel">
+                <div class="section">
+                    <h2>Market Opportunity (TAM, SAM, SOM)</h2>
+                    <div class="market-chart">
+                        <canvas id="marketChart"></canvas>
+                    </div>
+                    <div class="market-labels">
+                        <div class="market-label tam">
+                            <h3>TAM</h3>
+                            <p>Global Podcasting Market</p>
+                            <p><b>$153.56B by 2030</b></p>
+                        </div>
+                        <div class="market-label sam">
+                            <h3>SAM</h3>
+                            <p>Podcasters Seeking Expansion</p>
+                            <p><b>$10B</b></p>
+                        </div>
+                        <div class="market-label som">
+                            <h3>SOM</h3>
+                            <p>Initial Target Niche</p>
+                            <p><b>$1M in Year 1</b></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Market Research Insights</h2>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value">5M+</div>
+                            <div class="stat-label">Podcasts Worldwide</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">42%</div>
+                            <div class="stat-label">Americans Listen Monthly</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">87%</div>
+                            <div class="stat-label">Multilingual Demand Growth</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">27.6%</div>
+                            <div class="stat-label">Market CAGR</div>
+                        </div>
+                    </div>
+                    <div><ul>
+                                <li>* CAGR: Compound annual growth rate</li>
+                    </ul></div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="section">
+                    <h2>SWOT Analysis</h2>
+                    <div class="swot-grid">
+                        <div class="swot-item strengths">
+                            <div class="swot-title"><span>🥇</span> Strengths</div>
+                            <ul>
+                                <li>First-Mover Advantage in AI voice cloning for podcasts</li>
+                                <li>Authentic Voice Preservation</li>
+                                <li>Fully Automated Workflow</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="swot-item weaknesses">
+                            <div class="swot-title"><span>⛓️</span> Weaknesses</div>
+                            <ul>
+                                <li>API Dependency (ElevenLabs, Mistral)</li>
+                                <li>Untested at Scale</li>
+                                <li>Language Limitations (Initial Version)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="swot-item opportunities">
+                            <div class="swot-title"><span>📈</span> Opportunities</div>
+                            <ul>
+                                <li>Creator Economy Growth</li>
+                                <li>Globalization of Media</li>
+                                <li>AI Cost Reduction</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="swot-item threats">
+                            <div class="swot-title"><span>⚠️</span> Threats</div>
+                            <ul>
+                                <li>Big Tech Competition (Spotify, Apple)</li>
+                                <li>Ethical/Legal Risks (Voice Cloning)</li>
+                                <li>API Pricing Changes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>Sources</h2>
+                    <ul>
+                        <li>Grand View Research - Podcast Market Size & Trends</li>
+                        <li>Statista - Digital Media Consumption</li>
+                        <li>Edison Research - Podcast Consumer Report</li>
+                        <li>Reuters Institute - Digital News Report</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <a href="#" class="download-btn">Download as PNG</a>
+        
+        <div class="footnote">
+            <p>Global Podcaster - Transforming podcast localization with AI voice cloning technology</p>
+        </div>
+    </div>
+
+    <script>
+        // Market Chart
+        const ctx = document.getElementById('marketChart').getContext('2d');
+        const marketChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Addressable Market (TAM)', 'Serviceable Available Market (SAM)', 'Service Obtainable Market (SOM)'],
+                datasets: [{
+                    label: 'Market Value ($)',
+                    data: [153.56, 10, 0.001],
+                    backgroundColor: [
+                        '#2E4053',
+                        '#5D6D7E',
+                        '#85929E'
+                    ],
+                    borderColor: [
+                        '#1C2833',
+                        '#2C3E50',
+                        '#515A5A'
+                    ],
+                    borderWidth: 1,
+                    barPercentage: 0.6,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    if (context.parsed.y >= 1) {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed.y) + 'B';
+                                    } else {
+                                        label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 3 }).format(context.parsed.y) + 'B';
+                                    }
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Billions of USD'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 1) {
+                                    return '$' + value + 'B';
+                                } else {
+                                    return '$' + value + 'B';
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Download functionality
+        document.querySelector('.download-btn').addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('In a real implementation, this would download the visualization as a PNG image. This functionality requires a server-side component or additional JavaScript libraries.');
+        });
+    </script>
+</body>
+</html>
+
+</body>
+</html>
