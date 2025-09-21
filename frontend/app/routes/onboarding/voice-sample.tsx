@@ -1,3 +1,6 @@
+
+
+// app/routes/onboarding/voice-sample.tsx - Updated with state management
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
@@ -5,52 +8,29 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Progress } from "~/components/ui/progress";
 import { motion } from "framer-motion";
-import { 
-  Mic, 
-  Upload, 
-  ArrowRight, 
-  ArrowLeft, 
+import {
+  Mic,
+  Upload,
+  ArrowRight,
+  ArrowLeft,
   CheckCircle,
   AlertCircle,
   PlayCircle,
   Trash2
 } from "lucide-react";
-
-// Mock UploadFile function
-const UploadFile = async ({ file }) => {
-  // Simulate file upload with progress
-  await new Promise(resolve => setTimeout(resolve, 3000));
-  
-  return {
-    success: true,
-    file_url: `https://storage.example.com/voice-samples/${file.name}-${Date.now()}`,
-    message: "File uploaded successfully"
-  };
-};
-
-// Mock User API
-const User = {
-  updateMyUserData: async (data) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return {
-      success: true,
-      message: "User data updated successfully"
-    };
-  }
-};
+import { useApp } from "contexts/appContext";
 
 export default function OnboardingVoiceSample() {
   const navigate = useNavigate();
-  const [file, setFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
+  const { uploadVoiceSample, state } = useApp();
+  
+  const [file, setFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadedUrl, setUploadedUrl] = useState(null);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [dragActive, setDragActive] = useState(false);
 
-  const handleDrag = (e) => {
+  const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -60,24 +40,23 @@ export default function OnboardingVoiceSample() {
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
     const files = e.dataTransfer.files;
     if (files && files[0]) {
       handleFileSelect(files[0]);
     }
   };
 
-  const handleFileInput = (e) => {
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       handleFileSelect(e.target.files[0]);
     }
   };
 
-  const handleFileSelect = (selectedFile) => {
+  const handleFileSelect = (selectedFile: File) => {
     // Validate file type
     const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/m4a', 'audio/x-m4a'];
     if (!allowedTypes.includes(selectedFile.type)) {
@@ -96,12 +75,10 @@ export default function OnboardingVoiceSample() {
     uploadFile(selectedFile);
   };
 
-  const uploadFile = async (fileToUpload) => {
-    setIsUploading(true);
-    setUploadProgress(0);
-
+  const uploadFile = async (fileToUpload: File) => {
     try {
       // Simulate upload progress
+      setUploadProgress(0);
       const progressInterval = setInterval(() => {
         setUploadProgress(prev => {
           if (prev >= 90) {
@@ -112,21 +89,14 @@ export default function OnboardingVoiceSample() {
         });
       }, 200);
 
-      const result = await UploadFile({ file: fileToUpload });
-      
+      const fileUrl = await uploadVoiceSample(fileToUpload);
       clearInterval(progressInterval);
       setUploadProgress(100);
-      setUploadedUrl(result.file_url);
-      
-      // Save to user profile
-      await User.updateMyUserData({ voice_sample_url: result.file_url });
-      
-    } catch (error) {
-      setError("Failed to upload voice sample. Please try again.");
+      setUploadedUrl(fileUrl);
+    } catch (error: any) {
+      setError(error.message || "Failed to upload voice sample. Please try again.");
       console.error("Upload error:", error);
     }
-    
-    setIsUploading(false);
   };
 
   const removeFile = () => {
@@ -146,7 +116,7 @@ export default function OnboardingVoiceSample() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -164,7 +134,6 @@ export default function OnboardingVoiceSample() {
               Upload a 1-5 minute audio sample to enable voice cloning for authentic translations
             </p>
           </CardHeader>
-          
           <CardContent className="space-y-6 px-8 pb-8">
             {!uploadedUrl ? (
               <div
@@ -173,8 +142,8 @@ export default function OnboardingVoiceSample() {
                 onDragOver={handleDrag}
                 onDrop={handleDrop}
                 className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
-                  dragActive 
-                    ? "border-purple-400 bg-purple-50" 
+                  dragActive
+                    ? "border-purple-400 bg-purple-50"
                     : "border-gray-300 hover:border-gray-400"
                 }`}
               >
@@ -184,9 +153,9 @@ export default function OnboardingVoiceSample() {
                   className="hidden"
                   accept="audio/*"
                   onChange={handleFileInput}
+                  disabled={state.isLoading}
                 />
-                
-                {!isUploading ? (
+                {!state.isLoading ? (
                   <>
                     <Mic className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">
@@ -196,7 +165,7 @@ export default function OnboardingVoiceSample() {
                       or click to browse files
                     </p>
                     <Button
-                      onClick={() => document.getElementById('voice-upload').click()}
+                      onClick={() => document.getElementById('voice-upload')?.click()}
                       className="bg-purple-600 hover:bg-purple-700"
                     >
                       <Upload className="w-4 h-4 mr-2" />
@@ -270,21 +239,18 @@ export default function OnboardingVoiceSample() {
                 variant="outline"
                 onClick={() => navigate("/onboarding/rss-feed")}
                 className="flex items-center gap-2"
+                disabled={state.isLoading}
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </Button>
-              
               <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  onClick={handleSkip}
-                >
+                <Button variant="outline" onClick={handleSkip} disabled={state.isLoading}>
                   Skip for now
                 </Button>
                 <Button
                   onClick={handleContinue}
-                  disabled={!uploadedUrl}
+                  disabled={!uploadedUrl && !state.isLoading}
                   className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 flex items-center gap-2"
                 >
                   Continue

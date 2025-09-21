@@ -1,3 +1,4 @@
+// app/routes/onboarding/languages.tsx - Updated with state management
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "~/components/ui/button";
@@ -5,33 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Badge } from "~/components/ui/badge";
 import { Input } from "~/components/ui/input";
 import { motion } from "framer-motion";
-import { 
-  Languages, 
-  ArrowRight, 
-  ArrowLeft, 
+import {
+  Languages,
+  ArrowRight,
+  ArrowLeft,
   Search,
   Globe,
   CheckCircle
 } from "lucide-react";
-
-// Mock User API
-const User = {
-  updateMyUserData: async (data) => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return {
-      success: true,
-      message: "User data updated successfully"
-    };
-  }
-};
+import { useApp } from "contexts/appContext";
 
 export default function OnboardingLanguages() {
   const navigate = useNavigate();
-  const [selectedLanguages, setSelectedLanguages] = useState([]);
+  const { updateUser, state } = useApp();
+  
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
 
   const availableLanguages = [
     { code: 'es', name: 'Spanish', flag: '🇪🇸', speakers: '500M+' },
@@ -57,7 +47,7 @@ export default function OnboardingLanguages() {
     lang.code.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleLanguage = (languageCode) => {
+  const toggleLanguage = (languageCode: string) => {
     setSelectedLanguages(prev =>
       prev.includes(languageCode)
         ? prev.filter(code => code !== languageCode)
@@ -66,22 +56,15 @@ export default function OnboardingLanguages() {
   };
 
   const handleContinue = async () => {
-    setIsSaving(true);
-    
     try {
-      // Save selected languages to user profile
-      await User.updateMyUserData({ 
+      await updateUser({
         preferred_languages: selectedLanguages,
         onboarding_completed: true
       });
-      
-      // Navigate to completion page
       navigate("/onboarding/complete");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving languages:", error);
     }
-    
-    setIsSaving(false);
   };
 
   const getSelectedLanguageNames = () => {
@@ -93,7 +76,7 @@ export default function OnboardingLanguages() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center p-4">
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -111,7 +94,6 @@ export default function OnboardingLanguages() {
               Select the languages you want to translate your podcast into
             </p>
           </CardHeader>
-          
           <CardContent className="space-y-6 px-8 pb-8">
             {/* Search */}
             <div className="relative">
@@ -121,6 +103,7 @@ export default function OnboardingLanguages() {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search languages..."
                 className="pl-10 h-12"
+                disabled={state.isLoading}
               />
             </div>
 
@@ -203,6 +186,7 @@ export default function OnboardingLanguages() {
                     size="sm"
                     onClick={() => setSelectedLanguages(combo.codes)}
                     className="text-blue-700 border-blue-300 hover:bg-blue-100"
+                    disabled={state.isLoading}
                   >
                     {combo.name}
                   </Button>
@@ -216,17 +200,17 @@ export default function OnboardingLanguages() {
                 variant="outline"
                 onClick={() => navigate("/onboarding/voice-sample")}
                 className="flex items-center gap-2"
+                disabled={state.isLoading}
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </Button>
-              
               <Button
                 onClick={handleContinue}
-                disabled={selectedLanguages.length === 0 || isSaving}
+                disabled={selectedLanguages.length === 0 || state.isLoading}
                 className="bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 flex items-center gap-2 px-8"
               >
-                {isSaving ? "Saving..." : "Complete Setup"}
+                {state.isLoading ? "Saving..." : "Complete Setup"}
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
