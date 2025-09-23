@@ -80,6 +80,8 @@ def call_translation_agent(text, target_lang="es"):
     response = json.loads(stdout)
     return response.get("content", "")
 
+<<<<<<< HEAD:agents/agent.py
+=======
 def call_tts_agent(text, voice_id=None):
     msg = {"sender": "orchestrator", "receiver": "tts-agent", "content": text}
     if voice_id:
@@ -91,6 +93,7 @@ def log_with_spacing(message):
     print(message, file=sys.stderr)
 
 
+>>>>>>> dd1e13f07279aac668fe22961d52b025cedb319f:backend/agents/orchestrator/agent.py
 if __name__ == "__main__":
     for line in sys.stdin:
         try:
@@ -148,7 +151,10 @@ if __name__ == "__main__":
                 "receiver": msg["sender"],
                 "content": results
             }
+<<<<<<< HEAD:agents/agent.py
+=======
 
+>>>>>>> dd1e13f07279aac668fe22961d52b025cedb319f:backend/agents/orchestrator/agent.py
             print(json.dumps(response), flush=True)
         except Exception as e:
             import traceback

@@ -4,6 +4,7 @@ import sys
 import json
 import asyncio
 from dotenv import load_dotenv
+load_dotenv()
 
 # Cargar las variables de entorno desde el archivo .env
 load_dotenv("/workspaces/GlobalPodcaster/devcontainer/.env")

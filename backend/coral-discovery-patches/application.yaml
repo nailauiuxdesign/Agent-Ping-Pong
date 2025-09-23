@@ -189,10 +189,15 @@ registry:
         description: "Mistral API key for translation"
     runtime:
       type: "executable"
+<<<<<<< HEAD:coral-discovery-patches/application.yaml
+      command: [ "python3", "agents/translation-agent/agent.py" ]
+  
+=======
       command: [ "python3", "../../agents/translation-agent/agent.py" ]
       environment:
         - option: "MISTRAL_API_KEY"
 
+>>>>>>> dd1e13f07279aac668fe22961d52b025cedb319f:backend/coral-discovery-patches/application.yaml
   tts-agent:
     options:
       - name: "VOICE_ID"
@@ -204,6 +209,12 @@ registry:
         description: "API key para el servicio de TTS"
     runtime:
       type: "executable"
+<<<<<<< HEAD:coral-discovery-patches/application.yaml
+      command: [ "python3", "../agents/tts-agent/agent.py" ]
+      environment:
+        - option: "VOICE_ID"
+        - option: "TTS_API_KEY"
+=======
       command: [ "python3", "../../agents/tts-agent/agent.py" ]
       environment:
         - option: "VOICE_ID"
@@ -230,3 +241,4 @@ registry:
         - option: "FEEDS_FILE"
         - option: "POLL_INTERVAL"
         - option: "ORCHESTRATOR_URL"
+>>>>>>> dd1e13f07279aac668fe22961d52b025cedb319f:backend/coral-discovery-patches/application.yaml
